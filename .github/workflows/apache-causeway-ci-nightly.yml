@@ -115,12 +115,12 @@ jobs:
       # -- install software --
       # ----------------------
 
-      - name: Set up JDK (zulu 22)
+      - name: Set up JDK (zulu 23)
         if: env.SKIP_ALL != 'true'
         uses: actions/setup-java@v3
         with:
           distribution: 'zulu'
-          java-version: 22
+          java-version: 23
       
       - name: Set up Maven (3.9.9)
         uses: stCarolas/setup-maven@v5
@@ -336,6 +336,12 @@ jobs:
           # tar  ... build docker images and save them locally as tar files
           # skip ... skip docker image build steps
           JIB_MODE: skip
+          
+          SONAR_MAVEN_PLUGIN_VERSION: 
+
+      # ------------------------
+      # -- sonar              --
+      # ------------------------
 
       - name: Code Quality Analysis (EDGE)
         if: steps.revision.outputs.edge != 'skip' && env.SKIP_SONAR != 'true'
@@ -343,7 +349,7 @@ jobs:
         working-directory: ${{ env.ROOT_PATH_EDGE }}
         # -Dreleased ... process only released modules
         run: |
-          mvn verify sonar:sonar \
+          mvn org.sonarsource.scanner.maven:sonar-maven-plugin:$SONAR_MAVEN_PLUGIN_VERSION:sonar \
           -Dreleased \
           -Dsonar.projectKey=apache_causeway \
           -Dsonar.organization=apache \
@@ -354,6 +360,7 @@ jobs:
           -DskipTests=true \
           -Denforcer.skip
         env:
+          SONAR_MAVEN_PLUGIN_VERSION: 5.0.0.4389
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
       # ------------------------
